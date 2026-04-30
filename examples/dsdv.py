@@ -49,7 +49,7 @@ class DSDVNode(Node):
     def periodic_broadcast(self):
         self.seq += 2
         self.broadcast(('', self.nid, self.seq, 0))
-        self._next_broadcast += 5.0
+        self._next_broadcast += 2
         self.net.loop.schedule(self._next_broadcast, self.periodic_broadcast)
 
     def start(self):
@@ -63,7 +63,7 @@ class DSDVNode(Node):
 
 # --- network: line topology A--B--C--D--E ---
 loop = EventLoop()
-net = WirelessNetwork(loop, tx_range=.7, tx_time=0.8, seed=7, verbose=True)
+net = WirelessNetwork(loop, tx_range=1.5, tx_time=0.8, seed=7, verbose=True)
 for nid, x, y in [('A',0,0), ('B',1,0), ('C',2,0), ('D',3,0), ('E',4,0)]:
     net.add_node(DSDVNode(nid), x, y)
 
@@ -72,8 +72,7 @@ print("Topology:", {n: net.neighbors(n) for n in net.nodes})
 for nid in net.nodes:
     loop.schedule(0.5, net.nodes[nid].start)
 
-loop.run(until=2000)
-
+loop.run(until=1000)
 
 print("\nRoute tables:")
 for nid in sorted(net.nodes):
