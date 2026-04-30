@@ -24,6 +24,7 @@ class DSDVNode(Node):
                 "metric": metric + 1,
                 "seq_num": seq
             }
+            self.broadcast(('', orig, dest, seq, metric + 1, hops))
         else:
             existing = self.routing_table[dest]
             if seq > existing['seq_num']:
@@ -32,23 +33,16 @@ class DSDVNode(Node):
                     "metric": metric + 1,
                     "seq_num": seq
                 }
+
+                self.broadcast(('', orig, dest, seq, metric + 1, hops))
             elif seq == existing['seq_num']:
                 if metric + 1 < existing['metric']:
                     self.routing_table[dest]["next_hop"] = sender
                     self.routing_table[dest]["metric"] = metric + 1
 
-        self.broadcast(('', orig, dest, seq + 2, metric + 1, hops))
+                    self.broadcast(('', orig, dest, seq, metric + 1, hops))
 
-    # def _update(self, dest, via, seq, hops):
-    #     cur = self.routes.get(dest)
-    #     if not cur or seq > cur[1] or (seq == cur[1] and hops < cur[2]):
-    #         self.routes[dest] = (via, seq, hops)
-
-    # def _rrep(self, dest, orig):
-    #     if orig in self.routes:
-    #         self.unicast(self.routes[orig][0], ('RREP', dest, self.seq, orig, 0))
-
-    def discover(self, dest):
+    def periodic_broadcast(self, dest):
         self.seq += 1
         self.neighbors.add((self.nid, dest, self.seq, self.seq))
         self.net.log(f"{self.nid}: route discovery -> {dest}")
@@ -61,7 +55,10 @@ for nid, x, y in [('A',0,0), ('B',1,0), ('C',2,0), ('D',3,0), ('E',4,0)]:
     net.add_node(DSDVNode(nid), x, y)
 
 print("Topology:", {n: net.neighbors(n) for n in net.nodes})
-loop.schedule(1.0, net.nodes['A'].discover, 'E')
+
+for i in net.nodes:
+    for j in net.nodes:
+        loop.schedule(1.0, net.nodes[i].periodic_broadcast, j)
 loop.run(until=25)
 
 
