@@ -63,7 +63,7 @@ class DSDVNode(Node):
 
 # --- network: line topology A--B--C--D--E ---
 loop = EventLoop()
-net = WirelessNetwork(loop, tx_range=1.5, tx_time=0.8, seed=7, verbose=True)
+net = WirelessNetwork(loop, tx_range=.5, tx_time=0.8, seed=7, verbose=True)
 for nid, x, y in [('A',0,0), ('B',1,0), ('C',2,0), ('D',3,0), ('E',4,0)]:
     net.add_node(DSDVNode(nid), x, y)
 
